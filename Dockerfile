@@ -21,8 +21,10 @@ RUN ./configure \
   --with-dbus \
   --with-pam \
   --with-avahi \
+  --with-rundir=/run/cups \
   && make -j"$(nproc)" \
-  && make install DESTDIR=/tmp/pkg
+  && make install DESTDIR=/tmp/pkg \
+  && rm -rf /tmp/pkg/var/run || true
 
 # Etapa de runtime
 FROM debian:bookworm-slim
