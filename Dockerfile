@@ -3,7 +3,7 @@
 ############################
 # Etapa de build
 ############################
-FROM ubuntu:latest AS build
+FROM ubuntu:25.04 AS build
 ARG DEBIAN_FRONTEND=noninteractive
 # Dependências de compilação
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -36,7 +36,7 @@ RUN ./configure \
 ############################
 # Etapa de runtime
 ############################
-FROM ubuntu:latest
+FROM ubuntu:25.04
 ARG DEBIAN_FRONTEND=noninteractive
 # Dependências de execução e filtros
 RUN apt-get update && apt-get install -y --no-install-recommends \
