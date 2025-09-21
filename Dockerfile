@@ -3,12 +3,13 @@
 ############################
 # Etapa de build
 ############################
-FROM debian:bookworm-slim AS build
+FROM ubuntu:latest AS build
 ARG DEBIAN_FRONTEND=noninteractive
 # Dependências de compilação
 RUN apt-get update && apt-get install -y --no-install-recommends \
   git build-essential pkg-config autoconf automake libtool \
-  libavahi-client-dev libgnutls28-dev libpam0g-dev libdbus-1-dev \
+  avahi-daemon libavahi-client-dev libnss-mdns \
+  libgnutls28-dev libpam0g-dev libdbus-1-dev libsystemd-dev \
   libusb-1.0-0-dev zlib1g-dev libpaper-dev ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
@@ -35,7 +36,7 @@ RUN ./configure \
 ############################
 # Etapa de runtime
 ############################
-FROM debian:bookworm-slim
+FROM ubuntu:latest
 ARG DEBIAN_FRONTEND=noninteractive
 # Dependências de execução e filtros
 RUN apt-get update && apt-get install -y --no-install-recommends \
