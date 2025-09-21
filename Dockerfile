@@ -1,5 +1,5 @@
 # Etapa de build
-FROM debian:bookworm-slim AS build
+FROM debian:stable-slim AS build
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
   git build-essential pkg-config autoconf automake libtool \
@@ -27,7 +27,7 @@ RUN ./configure \
   && rm -rf /tmp/pkg/var/run || true
 
 # Etapa de runtime
-FROM debian:bookworm-slim
+FROM debian:stable-slim
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
   libgnutls30 libavahi-client3 libdbus-1-3 libusb-1.0-0 libpam0g \
