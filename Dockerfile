@@ -1,6 +1,11 @@
+# syntax=docker/dockerfile:1
+
+############################
 # Etapa de build
+############################
 FROM debian:bookworm-slim AS build
 ARG DEBIAN_FRONTEND=noninteractive
+# Dependências de compilação
 RUN apt-get update && apt-get install -y --no-install-recommends \
   git build-essential pkg-config autoconf automake libtool \
   libavahi-client-dev libgnutls28-dev libpam0g-dev libdbus-1-dev \
@@ -8,11 +13,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
-# Ajuste a versão conforme desejar (ex.: v2.4.12)
-ARG CUPS_REF=master
+# Versão fixa do CUPS
+ARG CUPS_REF=2.4.14
 RUN git clone --depth=1 --branch ${CUPS_REF} https://github.com/OpenPrinting/cups.git
 WORKDIR /src/cups
 
+# Configure e compile (ajuste do RuntimeDir para evitar /var/run)
 RUN ./configure \
   --prefix=/usr \
   --sysconfdir=/etc \
@@ -21,20 +27,30 @@ RUN ./configure \
   --with-dbus \
   --with-pam \
   --with-avahi \
+  --with-rundir=/run/cups \
   && make -j"$(nproc)" \
-  && make install DESTDIR=/tmp/pkg
+  && make install DESTDIR=/tmp/pkg \
+  && rm -rf /tmp/pkg/var/run || true
 
+############################
 # Etapa de runtime
+############################
 FROM debian:bookworm-slim
 ARG DEBIAN_FRONTEND=noninteractive
+# Dependências de execução e filtros
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  libgnutls30 libavahi-client3 libdbus-1-3 libusb-1.0-0 libpam0g \
-  libpaper1 ghostscript cups-filters \
+  ca-certificates libgnutls30 libavahi-client3 libdbus-1-3 libusb-1.0-0 \
+  libpam0g libpaper1 ghostscript cups-filters \
   && rm -rf /var/lib/apt/lists/*
 
+# Instalar artefatos compilados
 COPY --from=build /tmp/pkg/ /
 
+# Porta IPP
 EXPOSE 631
+
+# Persistência
 VOLUME ["/etc/cups","/var/spool/cups","/var/log/cups"]
 
+# Executa em foreground
 CMD ["/usr/sbin/cupsd","-f"]

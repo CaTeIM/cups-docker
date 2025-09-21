@@ -6,14 +6,11 @@ on:
       paths:
         - "Dockerfile"
         - ".github/workflows/cups.yml"
-    schedule:
-      - cron: "0 0 1 * *"   # mensal, 00:00 UTC no dia 1
-    workflow_dispatch:  
+    workflow_dispatch:
 
 env:
   IMAGE_NAME: cateim/cups
-  # Ajuste a referência do CUPS se quiser fixar uma versão estável
-  CUPS_REF: master
+  CUPS_REF: "2.4.14"
 
 jobs:
   build:
@@ -23,7 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Opcional, mas recomendado em runners x86 quando o alvo é ARM
+      # Opcional, mas útil em runners x86 para alvo ARM
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -48,6 +45,7 @@ jobs:
             CUPS_REF=${{ env.CUPS_REF }}
           tags: |
             ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:2.4.14
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
