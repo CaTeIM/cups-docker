@@ -10,7 +10,7 @@ on:
 
 env:
   IMAGE_NAME: cateim/cups
-  CUPS_REF: "2.4.14"
+  CUPS_REF: "v2.4.14"
 
 jobs:
   build:

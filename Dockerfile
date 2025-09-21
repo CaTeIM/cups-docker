@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /src
 # Versão fixa do CUPS
-ARG CUPS_REF=2.4.14
+ARG CUPS_REF=v2.4.14
 RUN git clone --depth=1 --branch ${CUPS_REF} https://github.com/OpenPrinting/cups.git
 WORKDIR /src/cups
 
