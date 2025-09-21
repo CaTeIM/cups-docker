@@ -22,15 +22,15 @@ WORKDIR /src/cups
 # Configure e compile (ajuste do RuntimeDir para evitar /var/run)
 RUN arch="$(dpkg-architecture -q DEB_HOST_MULTIARCH)" \
   && ./configure \
-     --prefix=/usr \
-     --sysconfdir=/etc \
-     --localstatedir=/var \
-     --with-gnutls \
-     --with-dbus \
-     --with-pam \
-     --with-avahi \
-     --with-rundir=/run/cups \
-     --libdir=/usr/lib/${arch} \
+      --prefix=/usr \
+      --sysconfdir=/etc \
+      --localstatedir=/var \
+      --with-gnutls \
+      --with-dbus \
+      --with-pam \
+      --with-avahi \
+      --with-rundir=/run/cups \
+      --libdir=/usr/lib/${arch} \
   && make -j"$(nproc)" \
   && make install DESTDIR=/tmp/pkg \
   && rm -rf /tmp/pkg/var/run || true
@@ -48,6 +48,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Instalar artefatos compilados
 COPY --from=build /tmp/pkg/ /
+
+RUN mkdir -p /run/cups && chown root:lp /run/cups
 RUN ldconfig
 
 # Porta IPP
