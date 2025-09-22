@@ -1,9 +1,16 @@
 # Servidor de Impressão CUPS - Imagem Docker Multi-Arquitetura
 
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/CaTeIM/cups-docker/cups.yml?branch=main&style=for-the-badge)
+![Docker Hub Pulls](https://img.shields.io/docker/pulls/cateim/cups?style=for-the-badge)
+![Docker Image Size](https://img.shields.io/docker/image-size/cateim/cups/latest?style=for-the-badge)
+
 Esta é uma imagem Docker multi-arquitetura do **[CUPS (Common Unix Printing System)](https://github.com/OpenPrinting/cups)**, construída sobre uma base Ubuntu LTS. O objetivo é fornecer um servidor de impressão moderno, estável, seguro e fácil de implantar.
 
-![Docker Hub Pulls](https://img.shields.io/docker/pulls/cateim/cups?style=flat-square)
-![Docker Image Size](https://img.shields.io/docker/image-size/cateim/cups/latest?style=flat-square)
+## 📚 Código-Fonte
+
+Este projeto é de código aberto. O `Dockerfile`, o script de inicialização e o workflow de build do GitHub Actions estão todos disponíveis no repositório do projeto.
+
+➡️ **[Repositório no GitHub: CaTeIM/cups-docker](https://github.com/CaTeIM/cups-docker)**
 
 ## ✨ Por que usar esta imagem?
 
