@@ -4,9 +4,6 @@ FROM ubuntu:24.04
 # Argumento para evitar prompts durante a instalação
 ARG DEBIAN_FRONTEND=noninteractive
 
-# Variável de ambiente padrão para a senha do usuário 'admin' da interface web
-ENV ADMIN_PASSWORD=admin
-
 # Labels para documentar a imagem no Docker Hub
 LABEL maintainer="cateim" \
       org.label-schema.schema-version="1.0" \
@@ -16,6 +13,7 @@ LABEL maintainer="cateim" \
 
 # Instala o CUPS, filtros, drivers e outras utilidades via apt-get
 RUN apt-get update \
+ && apt-get upgrade -y \
  && apt-get install -y --no-install-recommends \
     sudo \
     cups \
