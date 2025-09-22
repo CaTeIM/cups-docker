@@ -23,6 +23,7 @@ RUN apt-get update \
     printer-driver-all \
     openprinting-ppds \
     hplip \
+    printer-driver-foo2zjs \
     avahi-daemon \
     libnss-mdns \
     python3-pip \
