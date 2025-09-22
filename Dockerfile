@@ -7,30 +7,12 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Variável de ambiente padrão para a senha do usuário 'admin' da interface web
 ENV ADMIN_PASSWORD=admin
 
-<<<<<<< HEAD
 # Labels para documentar a imagem no Docker Hub
 LABEL maintainer="cateim" \
       org.label-schema.schema-version="1.0" \
       org.label-schema.name="cateim/cups" \
       org.label-schema.description="CUPS Server on Ubuntu 24.04" \
       org.label-schema.version="2.4.7"
-=======
-# Configure e compile (ajuste do RuntimeDir para evitar /var/run)
-RUN arch="$(dpkg-architecture -q DEB_HOST_MULTIARCH)" \
-  && ./configure \
-      --prefix=/usr \
-      --sysconfdir=/etc \
-      --localstatedir=/var \
-      --with-gnutls \
-      --with-dbus \
-      --with-pam \
-      --with-avahi \
-      --with-rundir=/run/cups \
-      --libdir=/usr/lib/${arch} \
-  && make -j"$(nproc)" \
-  && make install DESTDIR=/tmp/pkg \
-  && rm -rf /tmp/pkg/var/run || true
->>>>>>> f1015f024763b96475666bc36c2d9b9ebf1b9f70
 
 # Instala o CUPS, filtros, drivers e outras utilidades via apt-get
 RUN apt-get update \
@@ -48,20 +30,12 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-<<<<<<< HEAD
 # Cria um usuário 'admin' dedicado e dá as permissões corretas
 RUN adduser --home /home/admin --shell /bin/bash --gecos "admin" --disabled-password admin \
  && adduser admin sudo \
  && adduser admin lp \
  && adduser admin lpadmin \
  && echo 'admin ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-=======
-# Instalar artefatos compilados
-COPY --from=build /tmp/pkg/ /
-
-RUN mkdir -p /run/cups && chown root:lp /run/cups
-RUN ldconfig
->>>>>>> f1015f024763b96475666bc36c2d9b9ebf1b9f70
 
 # Pré-configura o CUPS para aceitar conexões remotas e compartilhar impressoras
 RUN /usr/sbin/cupsd \
