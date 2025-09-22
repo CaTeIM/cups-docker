@@ -29,8 +29,8 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# Usa o pip para forçar a atualização do Pillow para a versão corrigida
-RUN pip install --upgrade --break-system-packages Pillow==10.3.0
+# Usa o pip para forçar a atualização do Pillow e também do pip e setuptools
+RUN pip install --upgrade --break-system-packages pip setuptools Pillow==10.3.0
 
 # Cria um usuário 'admin' dedicado e dá as permissões corretas
 RUN adduser --home /home/admin --shell /bin/bash --gecos "admin" --disabled-password admin \
