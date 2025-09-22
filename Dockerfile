@@ -11,7 +11,7 @@ LABEL maintainer="cateim" \
       org.label-schema.description="CUPS Server on Ubuntu 24.04" \
       org.label-schema.version="2.4.7"
 
-# Instala o CUPS, filtros, drivers e outras utilidades via apt-get
+# Instala o CUPS, drivers e as novas dependências
 RUN apt-get update \
  && apt-get upgrade -y \
  && apt-get install -y --no-install-recommends \
@@ -25,8 +25,12 @@ RUN apt-get update \
     hplip \
     avahi-daemon \
     libnss-mdns \
+    python3-pip \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+
+# Usa o pip para forçar a atualização do Pillow para a versão corrigida
+RUN pip install --upgrade Pillow==10.3.0
 
 # Cria um usuário 'admin' dedicado e dá as permissões corretas
 RUN adduser --home /home/admin --shell /bin/bash --gecos "admin" --disabled-password admin \
