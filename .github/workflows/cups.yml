@@ -3,14 +3,10 @@ name: build-and-push-cups
 on:
     push:
       branches: [ "main" ]
-      paths:
-        - "Dockerfile"
-        - ".github/workflows/cups.yml"
     workflow_dispatch:
 
 env:
   IMAGE_NAME: cateim/cups
-  CUPS_REF: "v2.4.14"
 
 jobs:
   build:
@@ -20,7 +16,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Opcional, mas útil em runners x86 para alvo ARM
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -41,11 +36,8 @@ jobs:
           context: .
           push: true
           platforms: linux/arm64
-          build-args: |
-            CUPS_REF=${{ env.CUPS_REF }}
           tags: |
             ${{ env.IMAGE_NAME }}:latest
-            ${{ env.IMAGE_NAME }}:2.4.14
-            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME }}:2.4.7
           cache-from: type=gha
           cache-to: type=gha,mode=max

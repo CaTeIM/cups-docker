@@ -1,60 +1,62 @@
-# syntax=docker/dockerfile:1
+# Usa a imagem base do Ubuntu 24.04 LTS, que é moderna e estável
+FROM ubuntu:24.04
 
-############################
-# Etapa de build
-############################
-FROM ubuntu:latest AS build
+# Argumento para evitar prompts durante a instalação
 ARG DEBIAN_FRONTEND=noninteractive
-# Dependências de compilação
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  git build-essential pkg-config autoconf automake libtool \
-  avahi-daemon libavahi-client-dev libnss-mdns \
-  libgnutls28-dev libpam0g-dev libdbus-1-dev libsystemd-dev \
-  libusb-1.0-0-dev zlib1g-dev libpaper-dev ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /src
-# Versão fixa do CUPS
-ARG CUPS_REF=v2.4.14
-RUN git clone --depth=1 --branch ${CUPS_REF} https://github.com/OpenPrinting/cups.git
-WORKDIR /src/cups
+# Variável de ambiente padrão para a senha do usuário 'admin' da interface web
+ENV ADMIN_PASSWORD=admin
 
-# Configure e compile (ajuste do RuntimeDir para evitar /var/run)
-RUN arch="$(dpkg-architecture -q DEB_HOST_MULTIARCH)" \
-  && ./configure \
-     --prefix=/usr \
-     --sysconfdir=/etc \
-     --localstatedir=/var \
-     --with-gnutls \
-     --with-dbus \
-     --with-pam \
-     --with-avahi \
-     --with-rundir=/run/cups \
-     --libdir=/usr/lib/${arch} \
-  && make -j"$(nproc)" \
-  && make install DESTDIR=/tmp/pkg \
-  && rm -rf /tmp/pkg/var/run || true
+# Labels para documentar a imagem no Docker Hub
+LABEL maintainer="cateim" \
+      org.label-schema.schema-version="1.0" \
+      org.label-schema.name="cateim/cups" \
+      org.label-schema.description="CUPS Server on Ubuntu 24.04" \
+      org.label-schema.version="2.4.7"
 
-############################
-# Etapa de runtime
-############################
-FROM ubuntu:latest
-ARG DEBIAN_FRONTEND=noninteractive
-# Dependências de execução e filtros
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  ca-certificates libgnutls30 libavahi-client3 libdbus-1-3 libusb-1.0-0 \
-  libpam0g libpaper1 ghostscript cups-filters \
-  && rm -rf /var/lib/apt/lists/*
+# Instala o CUPS, filtros, drivers e outras utilidades via apt-get
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+    sudo \
+    cups \
+    cups-bsd \
+    cups-filters \
+    foomatic-db-compressed-ppds \
+    printer-driver-all \
+    openprinting-ppds \
+    hplip \
+    avahi-daemon \
+    libnss-mdns \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
-# Instalar artefatos compilados
-COPY --from=build /tmp/pkg/ /
-RUN ldconfig
+# Cria um usuário 'admin' dedicado e dá as permissões corretas
+RUN adduser --home /home/admin --shell /bin/bash --gecos "admin" --disabled-password admin \
+ && adduser admin sudo \
+ && adduser admin lp \
+ && adduser admin lpadmin \
+ && echo 'admin ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# Porta IPP
+# Pré-configura o CUPS para aceitar conexões remotas e compartilhar impressoras
+RUN /usr/sbin/cupsd \
+ && while [ ! -f /var/run/cups/cupsd.pid ]; do sleep 1; done \
+ && cupsctl --remote-admin --remote-any --share-printers \
+ && kill $(cat /var/run/cups/cupsd.pid) \
+ && echo "ServerAlias *" >> /etc/cups/cupsd.conf
+
+# Salva uma cópia da configuração inicial para restaurar se o volume estiver vazio
+RUN cp -rp /etc/cups /etc/cups-skel
+
+# Copia e dá permissão de execução para o script de inicialização
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Define o script como ponto de entrada do container
+ENTRYPOINT [ "docker-entrypoint.sh" ]
+
+# Comando padrão para iniciar o CUPS
+CMD ["cupsd", "-f"]
+
+# Expõe a porta e define os volumes
 EXPOSE 631
-
-# Persistência
-VOLUME ["/etc/cups","/var/spool/cups","/var/log/cups"]
-
-# Executa em foreground
-CMD ["/usr/sbin/cupsd","-f"]
+VOLUME ["/etc/cups", "/var/spool/cups", "/var/log/cups"]
