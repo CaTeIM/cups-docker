@@ -32,6 +32,8 @@ services:
     # Use 'latest' ou uma tag de versão específica como '2.4.7'
     image: cateim/cups:latest
     container_name: cups
+    # Libera acesso total do container aos dispositivos do sistema
+    privileged: true
     # 'host' é a forma mais fácil de garantir a descoberta de impressoras na rede (AirPrint)
     network_mode: host
     restart: unless-stopped
