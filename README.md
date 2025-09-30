@@ -10,7 +10,7 @@ Esta é uma imagem Docker multi-arquitetura do **[CUPS (Common Unix Printing Sys
 
 Este projeto é de código aberto. O `Dockerfile`, o script de inicialização e o workflow de build do GitHub Actions estão todos disponíveis no repositório do projeto.
 
-➡️ **[Repositório no GitHub: CaTeIM/cups-docker](https://github.com/CaTeIM/cups-docker)**
+➡️ **[Repositório no GitHub: CaTeIM/docker-cups](https://github.com/CaTeIM/docker-cups)**
 
 ## ✨ Por que usar esta imagem?
 
