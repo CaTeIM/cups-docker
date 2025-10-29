@@ -16,12 +16,12 @@ jobs:
       fail-fast: false 
       matrix:
         include:
-          # Build 1: Ubuntu Stable (será o 'latest')
+          # Build 1: Ubuntu (será o 'latest')
           - os: ubuntu
             dockerfile: Dockerfile.ubuntu
             version_tag: 2.4.12 # Versão do CUPS no Ubuntu 25.10
             
-          # Build 2: Debian Stable
+          # Build 2: Debian
           - os: debian
             dockerfile: Dockerfile.debian
             version_tag: 2.4.10 # Versão do CUPS no Debian 13
@@ -44,8 +44,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Gera as tags dinamicamente
-      - name: Build TAGS
+      # Etapa 1: GERAR as tags
+      - name: Gera as tags dinamicamente
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -57,18 +57,18 @@ jobs:
             type=raw,value={{matrix.version_tag}}
             # Gera 'cateim/cups:latest' APENAS se matrix.os for 'ubuntu'
             type=raw,value=latest,enable=${{ matrix.os == 'ubuntu' }}
-            # Gera 'cateim/cups:sha-a1b2c3d' (baseado no SHA do commit)
+            # Gera 'cateim/cups:sha-a1b2c3d'
             type=sha,prefix=sha-,suffix=,format=short
 
-      # Usa a matriz e as tags geradas
+      # Etapa 2: USAR as tags geradas no build
       - name: Build and push ${{ matrix.os }}
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./${{ matrix.dockerfile }} # <-- Usa o Dockerfile da matriz
+          file: ./${{ matrix.dockerfile }}
           push: true
           platforms: linux/amd64, linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}     # <-- Usa as tags geradas
-          labels: ${{ steps.meta.outputs.labels }} # <-- Usa as labels geradas
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
