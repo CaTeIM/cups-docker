@@ -1,9 +1,9 @@
 name: build-and-push-cups
 
 on:
-    push:
-      branches: [ "main" ]
-    workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   IMAGE_NAME: cateim/cups
@@ -11,7 +11,21 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
+    strategy:
+      fail-fast: false 
+      matrix:
+        include:
+          # Build 1: Ubuntu Stable (será o 'latest')
+          - os: ubuntu
+            dockerfile: Dockerfile.ubuntu
+            version_tag: 2.4.12 # Versão do CUPS no Ubuntu 25.10
+            
+          # Build 2: Debian Stable
+          - os: debian
+            dockerfile: Dockerfile.debian
+            version_tag: 2.4.10 # Versão do CUPS no Debian 13
+            
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,15 +44,31 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # Gera as tags dinamicamente
       - name: Build and push
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            # Gera 'cateim/cups:ubuntu' ou 'cateim/cups:debian'
+            type=raw,value={{matrix.os}}
+            # Gera 'cateim/cups:2.4.7' ou 'cateim/cups:2.4.6'
+            type=raw,value={{matrix.version_tag}}
+            # Gera 'cateim/cups:latest' APENAS se matrix.os for 'ubuntu'
+            type=raw,value=latest,enable=${{ matrix.os == 'ubuntu' }}
+            # Gera 'cateim/cups:ubuntu-a1b2c3d' ou 'cateim/cups:debian-a1b2c3d' (baseado no SHA do commit)
+            type=sha,prefix={{matrix.os}}-,suffix=,format=short
+
+      # Usa a matriz e as tags geradas
+      - name: Build and push ${{ matrix.os }}
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: ./${{ matrix.dockerfile }} # <-- Usa o Dockerfile da matriz
           push: true
           platforms: linux/amd64, linux/arm64
-          tags: |
-            ${{ env.IMAGE_NAME }}:latest
-            ${{ env.IMAGE_NAME }}:2.4.7
-            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          tags: ${{ steps.meta.outputs.tags }}     # <-- Usa as tags geradas
+          labels: ${{ steps.meta.outputs.labels }} # <-- Usa as labels geradas
           cache-from: type=gha
           cache-to: type=gha,mode=max

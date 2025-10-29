@@ -1,0 +1,65 @@
+# Usa a imagem base do Ubuntu 25.10 (Questing Quokka)
+FROM ubuntu:25.10
+
+# Argumento para evitar prompts durante a instalação
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Labels para documentar a imagem no Docker Hub
+LABEL maintainer="cateim" \
+      org.label-schema.schema-version="1.0" \
+      org.label-schema.name="cateim/cups" \
+      org.label-schema.description="CUPS Server on Ubuntu 25.10" \
+      org.label-schema.version="2.4.12"
+
+# Instala o CUPS, drivers e as novas dependências
+RUN apt-get update \
+ && apt-get upgrade -y \
+ && apt-get install -y --no-install-recommends \
+    sudo \
+    cups \
+    cups-bsd \
+    cups-filters \
+    foomatic-db-compressed-ppds \
+    printer-driver-all \
+    openprinting-ppds \
+    hplip \
+    printer-driver-foo2zjs \
+    avahi-daemon \
+    libnss-mdns \
+    python3-pip \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Usa o pip para forçar a atualização dos pacotes necessários
+RUN pip install --upgrade --break-system-packages setuptools Pillow==10.3.0
+
+# Cria um usuário 'admin' dedicado e dá as permissões corretas
+RUN adduser --home /home/admin --shell /bin/bash --gecos "admin" --disabled-password admin \
+ && adduser admin sudo \
+ && adduser admin lp \
+ && adduser admin lpadmin \
+ && echo 'admin ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# Pré-configura o CUPS para aceitar conexões remotas e compartilhar impressoras
+RUN /usr/sbin/cupsd \
+ && while [ ! -f /var/run/cups/cupsd.pid ]; do sleep 1; done \
+ && cupsctl --remote-admin --remote-any --share-printers \
+ && kill $(cat /var/run/cups/cupsd.pid) \
+ && echo "ServerAlias *" >> /etc/cups/cupsd.conf
+
+# Salva uma cópia da configuração inicial para restaurar se o volume estiver vazio
+RUN cp -rp /etc/cups /etc/cups-skel
+
+# Copia e dá permissão de execução para o script de inicialização
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Define o script como ponto de entrada do container
+ENTRYPOINT [ "docker-entrypoint.sh" ]
+
+# Comando padrão para iniciar o CUPS
+CMD ["cupsd", "-f"]
+
+# Expõe a porta e define os volumes
+EXPOSE 631
+VOLUME ["/etc/cups", "/var/spool/cups", "/var/log/cups"]

@@ -1,5 +1,5 @@
-# Usa a imagem base do Ubuntu 24.04 LTS, que é moderna e estável
-FROM ubuntu:24.04
+# Usa a imagem base do Debian 13 (Trixie)
+FROM debian:trixie-slim
 
 # Argumento para evitar prompts durante a instalação
 ARG DEBIAN_FRONTEND=noninteractive
@@ -8,14 +8,17 @@ ARG DEBIAN_FRONTEND=noninteractive
 LABEL maintainer="cateim" \
       org.label-schema.schema-version="1.0" \
       org.label-schema.name="cateim/cups" \
-      org.label-schema.description="CUPS Server on Ubuntu 24.04" \
-      org.label-schema.version="2.4.7"
+      org.label-schema.description="CUPS Server on Debian 13 (Trixie)" \
+      org.label-schema.version="2.4.10"
 
-# Instala o CUPS, drivers e as novas dependências
+# Instala o CUPS, drivers e dependências
+# Adicionamos 'bash' e 'passwd' que são usados no entrypoint 
 RUN apt-get update \
  && apt-get upgrade -y \
  && apt-get install -y --no-install-recommends \
     sudo \
+    bash \
+    passwd \
     cups \
     cups-bsd \
     cups-filters \
@@ -51,6 +54,7 @@ RUN /usr/sbin/cupsd \
 RUN cp -rp /etc/cups /etc/cups-skel
 
 # Copia e dá permissão de execução para o script de inicialização
+# (Seu script docker-entrypoint.sh é 100% compatível!)
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
