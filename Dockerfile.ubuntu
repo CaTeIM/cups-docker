@@ -34,7 +34,7 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # Usa o pip para forçar a atualização dos pacotes necessários
-RUN pip install --upgrade --break-system-packages setuptools Pillow==10.3.0
+RUN pip install --upgrade --break-system-packages setuptools Pillow
 
 # Cria um usuário 'admin' dedicado e dá as permissões corretas
 RUN adduser --home /home/admin --shell /bin/bash --gecos "admin" --disabled-password admin \
