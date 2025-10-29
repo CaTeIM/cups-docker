@@ -27,6 +27,9 @@ RUN apt-get update \
     avahi-daemon \
     libnss-mdns \
     python3-pip \
+    python3-dev \
+    libjpeg-dev \
+    zlib1g-dev \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
