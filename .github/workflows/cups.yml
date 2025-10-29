@@ -51,14 +51,18 @@ jobs:
         with:
           images: ${{ env.IMAGE_NAME }}
           tags: |
-            # Gera 'cateim/cups:ubuntu' ou 'cateim/cups:debian'
-            type=raw,value={{matrix.os}}
-            # Gera 'cateim/cups:2.4.12' ou 'cateim/cups:2.4.10'
-            type=raw,value={{matrix.version_tag}}
+
             # Gera 'cateim/cups:latest' APENAS se matrix.os for 'ubuntu'
             type=raw,value=latest,enable=${{ matrix.os == 'ubuntu' }}
+
             # Gera 'cateim/cups:sha-a1b2c3d'
             type=sha,prefix=sha-,suffix=,format=short
+
+            # Gera 'cateim/cups:ubuntu' ou 'cateim/cups:debian'
+            type=flavor,prefix={{matrix.os}},suffix=
+
+            # Gera 'cateim/cups:2.4.12' ou 'cateim/cups:2.4.10'
+            type=raw,value={{matrix.version_tag}}
 
       # Etapa 2: USAR as tags geradas no build
       - name: Build and push ${{ matrix.os }}

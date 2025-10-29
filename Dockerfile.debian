@@ -12,7 +12,6 @@ LABEL maintainer="cateim" \
       org.label-schema.version="2.4.10"
 
 # Instala o CUPS, drivers e dependências
-# Adicionamos 'bash' e 'passwd' que são usados no entrypoint 
 RUN apt-get update \
  && apt-get upgrade -y \
  && apt-get install -y --no-install-recommends \
