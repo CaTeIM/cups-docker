@@ -59,10 +59,10 @@ jobs:
             type=sha,prefix=sha-,suffix=,format=short
 
             # Gera 'cateim/cups:ubuntu' ou 'cateim/cups:debian'
-            type=flavor,prefix={{matrix.os}},suffix=
+            type=raw,value=${{ matrix.os }}
 
             # Gera 'cateim/cups:2.4.12' ou 'cateim/cups:2.4.10'
-            type=raw,value={{matrix.version_tag}}
+            type=raw,value=${{ matrix.version_tag }}
 
       # Etapa 2: USAR as tags geradas no build
       - name: Build and push ${{ matrix.os }}
