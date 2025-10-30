@@ -24,10 +24,15 @@ Este repositório constrói duas "trilhas" de imagem. A tag `latest` sempre apon
 ## ✨ Por que usar esta imagem?
 
 -   ✅ **Sempre Atualizado**: Utiliza o método de instalação `apt-get` a partir dos repositórios oficiais do Ubuntu 25.10 e Debian 13, garantindo as versões mais recentes do CUPS.
+
 -   ✅ **Multi-Distro**: Escolha entre uma base Ubuntu (`latest`) ou Debian (`debian`), dependendo da sua preferência.
+
 -   🔒 **Segura**: O processo de build inclui a aplicação de todas as atualizações de segurança disponíveis (`apt-get upgrade`).
+
 -   🖨️ **Pronta para Uso**: Inclui um conjunto completo de drivers de impressão (`printer-driver-all`, `hplip`, `openprinting-ppds`), tornando a maioria das impressoras plug-and-play.
+
 -   🚀 **Multi-Arquitetura**: Construída para rodar nativamente em `linux/amd64` (PCs, Servidores Intel/AMD) e `linux/arm64` (Raspberry Pi, Orange Pi 5, etc.).
+
 -   🔧 **Configuração Inteligente**: Possui um script de inicialização que configura um usuário administrador e prepara o CUPS para acesso remoto na primeira execução.
 
 ## ⚙️ Como Usar (Exemplo com `docker-compose.yml`)
